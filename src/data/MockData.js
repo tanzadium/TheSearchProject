@@ -62,7 +62,11 @@ const MOCK_DATA = mockData.map(item => {
   if (item.id === 0) {
     return {
       ...item,
+<<<<<<< HEAD
       profilePicture: '/seller-profile-zoom.jpg'
+=======
+      profilePicture: '/seller-profile.png'
+>>>>>>> dba89e14d2f325a84c5b22ebadb9eac688e67c01
     };
   }
 
