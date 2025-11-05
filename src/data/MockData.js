@@ -59,31 +59,30 @@ const mockData = [
 
 
 const MOCK_DATA = mockData.map(item => {
-
-    if (item.id === 0) {
-        return {
-            ...item,
-            profilePicture: '/seller-profile.png'
-        };
-    }
-
-    //ใช้ profileId เดิมถ้า username ซ้ำ
-    if (!usernameToProfileMap[item.username]) {
-        const currentProfileId = nextProfileId <= MAX_PROFILE_ID ? nextProfileId++ : MAX_PROFILE_ID;
-        usernameToProfileMap[item.username] = currentProfileId;
-    }
-
-    const profileId = usernameToProfileMap[item.username];
-    const imageFileName = `comment-profile-id-${profileId}.jpg`;
-
-    const relativePath = `/comment-profiles/${imageFileName}`;
-
-    const profilePictureUrl = new URL(relativePath, import.meta.url).href;
-
+  if (item.id === 0) {
     return {
-        ...item,
-        profilePicture: profilePictureUrl
+      ...item,
+      profilePicture: '/seller-profile-zoom.jpg'
     };
+  }
+
+  // ใช้ profileId เดิมถ้า username ซ้ำ
+  if (!usernameToProfileMap[item.username]) {
+    const currentProfileId = nextProfileId <= MAX_PROFILE_ID ? nextProfileId++ : MAX_PROFILE_ID;
+    usernameToProfileMap[item.username] = currentProfileId;
+  }
+
+  const profileId = usernameToProfileMap[item.username];
+  const imageFileName = `comment-profile-id-${profileId}.jpg`;
+
+  // ✅ ใช้ path แบบ static จาก public folder
+  const profilePictureUrl = `/comment-profiles/${imageFileName}`;
+
+  return {
+    ...item,
+    profilePicture: profilePictureUrl
+  };
 });
+
 
 export default MOCK_DATA;

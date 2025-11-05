@@ -11,7 +11,7 @@ const Header = ({ username, profilePicture }) => {
           <img 
             src={profilePicture} 
             alt={username}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover transform scale-125"
           />
         </div>
         <span className="text-white font-semibold text-base drop-shadow-lg">{username}</span>
@@ -45,22 +45,33 @@ const CommentItem = ({ profilePicture, username, comment }) => {
 // Comment List Component
 const CommentList = ({ comments }) => {
   const listRef = useRef(null);
+  const [autoScroll, setAutoScroll] = useState(true);
 
+  // ตรวจสอบว่า user เลื่อนขึ้นไหม
+  const handleScroll = () => {
+    if (!listRef.current) return;
+    const { scrollTop, scrollHeight, clientHeight } = listRef.current;
+    const isAtBottom = scrollHeight - scrollTop <= clientHeight + 20;
+    setAutoScroll(isAtBottom);
+  };
+
+  // ถ้าอยู่ล่างสุด -> scroll อัตโนมัติ
   useEffect(() => {
-    if (listRef.current) {
+    if (autoScroll && listRef.current) {
       listRef.current.scrollTop = listRef.current.scrollHeight;
     }
-  }, [comments]);
+  }, [comments, autoScroll]);
 
   return (
     <div 
       ref={listRef}
+      onScroll={handleScroll}
       className="absolute bottom-20 left-0 right-0 z-10 px-3 max-h-[55vh] overflow-y-auto pb-2"
       style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
     >
-      {comments.map((comment) => (
+      {comments.map((comment, index) => (
         <CommentItem 
-          key={comment.id}
+          key={comment.id || index}
           profilePicture={comment.profilePicture}
           username={comment.username}
           comment={comment.comment}
@@ -70,7 +81,7 @@ const CommentList = ({ comments }) => {
   );
 };
 
-// Video Section Component with 16:9 aspect ratio
+// Video Section Component
 const VideoSection = ({ onTap }) => {
   const videoRef = useRef(null);
   const [cameraError, setCameraError] = useState(false);
@@ -184,16 +195,33 @@ const InputBar = () => {
 export default function App() {
   const [visibleComments, setVisibleComments] = useState([]);
   const [commentIndex, setCommentIndex] = useState(1); // Start from 1 to skip seller
+  const seller = MOCK_DATA[0];
 
-  const handleVideoTap = () => {
+  // เพิ่ม comment ใหม่เมื่อ index เปลี่ยน
+  useEffect(() => {
+    if (commentIndex > 1 && commentIndex <= MOCK_DATA.length) {
+      setVisibleComments(prev => [...prev, MOCK_DATA[commentIndex - 1]]);
+    }
+  }, [commentIndex]);
+
+  // ฟังก์ชันสำหรับเพิ่ม comment (จากคลิกหรือกด space)
+  const addComment = () => {
     if (commentIndex < MOCK_DATA.length) {
-      setVisibleComments(prev => [...prev, MOCK_DATA[commentIndex]]);
       setCommentIndex(prev => prev + 1);
     }
   };
 
-  // Get seller info (first item)
-  const seller = MOCK_DATA[0];
+  // ให้ spacebar ทำงานเหมือนคลิก
+  useEffect(() => {
+    const handleSpace = (e) => {
+      if (e.code === 'Space' && document.activeElement.tagName !== 'INPUT') {
+        e.preventDefault();
+        addComment();
+      }
+    };
+    window.addEventListener('keydown', handleSpace);
+    return () => window.removeEventListener('keydown', handleSpace);
+  }, [commentIndex]);
 
   return (
     <div className="relative w-full h-screen overflow-hidden bg-black">
@@ -216,15 +244,9 @@ export default function App() {
         }
       `}</style>
 
-      <VideoSection onTap={handleVideoTap} />
-      
-      <Header 
-        username={seller.username}
-        profilePicture={seller.profilePicture}
-      />
-      
+      <VideoSection onTap={addComment} />
+      <Header username={seller.username} profilePicture={seller.profilePicture} />
       <CommentList comments={visibleComments} />
-      
       <InputBar />
     </div>
   );
