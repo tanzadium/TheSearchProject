@@ -3,7 +3,7 @@ let nextProfileId = 1;
 const MAX_PROFILE_ID = 41; 
 
 const mockData = [
-    { id: 0, username: "เฮียเส็งรับจบ"},
+    { id: 0, username: "ดีดีshop"},
     { id: 1, username: "Honey_luv", comment: "กดใจรัว ๆ แล้วค่า💖" },
     { id: 2, username: "2youmybaby", comment: "กดแชร์แล้วนะค้าาา" },
     { id: 3, username: "Maengibah", comment: "สวัสดีค่าาา มาแล้วค่ะ" },
@@ -62,7 +62,7 @@ const MOCK_DATA = mockData.map(item => {
   if (item.id === 0) {
     return {
       ...item,
-      profilePicture: '/seller-profile-zoom.jpg'
+      profilePicture: '/new-seller-profle.PNG'
     };
   }
 
