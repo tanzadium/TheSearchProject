@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ShoppingCart, Send, Eye, Plus, Check, Settings, Camera, Palette, Video, X } from 'lucide-react';
+import { ShoppingCart, Send, Eye, Plus, Check, Settings, Camera, Palette, Video, X, Play, Pause } from 'lucide-react';
 import MOCK_DATA from '../data/MockData';
 
 // --- Assets ---
@@ -32,7 +32,6 @@ const VideoBackground = ({ mode, color, selectedDeviceId }) => {
       }
 
       try {
-        // iPhone/Mobile Optimization: ใช้ facingMode: 'environment' หรือ 'user'
         const constraints = {
           audio: false,
           video: selectedDeviceId 
@@ -68,7 +67,7 @@ const VideoBackground = ({ mode, color, selectedDeviceId }) => {
         autoPlay
         playsInline
         muted
-        className="w-full h-full object-cover transform scale-x-[-1]" // Mirror effect
+        className="w-full h-full object-cover transform scale-x-[-1]"
       />
       <div className="absolute inset-0 bg-black/20 pointer-events-none" />
     </div>
@@ -89,7 +88,6 @@ const SettingsMenu = ({
     if (isOpen && mode === 'video') {
       const getDevices = async () => {
         try {
-          // ขอ permission ก่อนเพื่อให้ browser ยอม list ชื่ออุปกรณ์
           await navigator.mediaDevices.getUserMedia({ video: true });
           const allDevices = await navigator.mediaDevices.enumerateDevices();
           setDevices(allDevices.filter(device => device.kind === 'videoinput'));
@@ -105,7 +103,6 @@ const SettingsMenu = ({
 
   return (
     <div className="absolute top-28 left-6 z-50 bg-black/90 backdrop-blur-md p-4 rounded-xl border border-white/20 text-white shadow-2xl w-80 animate-slide-up max-w-[90vw]">
-      
       <div className="flex justify-between items-center mb-4">
         <h3 className="font-bold flex items-center gap-2 text-lg">
           <Settings size={20} /> ตั้งค่าพื้นหลัง
@@ -215,7 +212,7 @@ const LikeStream = ({ isVisible }) => {
   if (!isVisible) return null;
 
   return (
-    <div className="absolute bottom-24 right-32 w-48 h-96 pointer-events-none z-0 overflow-hidden">
+    <div className="hidden md:block absolute bottom-24 right-32 w-48 h-96 pointer-events-none z-0 overflow-hidden">
       {hearts.map(heart => (
         <div
           key={heart.id}
@@ -234,11 +231,9 @@ const LikeStream = ({ isVisible }) => {
 };
 
 // --- Header Component ---
-// Update: รับ prop onSettingsClick เพื่อให้กดแล้วเปิดเมนูได้
-const Header = ({ username, profilePicture, viewerCount, onSettingsClick }) => {
+const Header = ({ username, profilePicture, viewerCount, onSettingsClick, isAutoActive }) => {
   const [isFollowing, setIsFollowing] = useState(false);
   return (
-    // Update: เพิ่ม pt-[env(safe-area-inset-top)] เพื่อหลบ Dynamic Island
     <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between p-6 pt-[max(1.5rem,env(safe-area-inset-top))] bg-gradient-to-b from-black/80 to-transparent transition-all">
       <div className="flex items-center gap-4">
         <div className="w-20 h-20 rounded-full border-2 overflow-hidden bg-gray-300 shadow-xl shrink-0">
@@ -258,12 +253,12 @@ const Header = ({ username, profilePicture, viewerCount, onSettingsClick }) => {
         </div>
       </div>
       
-      {/* Update: เพิ่ม onClick และ cursor-pointer เพื่อเปิดเมนูตั้งค่า */}
       <button 
         onClick={onSettingsClick}
         className="flex items-center gap-2 bg-black/40 backdrop-blur-sm px-3 py-1.5 rounded-lg border border-white/10 shadow-lg cursor-pointer active:scale-95 transition-transform hover:bg-black/50"
       >
-        <Eye size={20} className="text-white" />
+        {/* ตรงนี้ครับ: เช็ค isAutoActive ถ้าจริงให้เป็นสีเขียว (text-green-400) */}
+        <Eye size={20} className={isAutoActive ? "text-green-400" : "text-white"} />
         <span className="text-white font-bold text-xl min-w-[3ch] text-center">{viewerCount.toLocaleString()}</span>
       </button>
     </div>
@@ -304,7 +299,6 @@ const CommentList = ({ comments }) => {
   }, [comments, autoScroll]);
 
   return (
-    // Update: ปรับความสูงให้สัมพันธ์กับ safe area ด้านล่าง
     <div
       ref={listRef}
       onScroll={handleScroll}
@@ -328,14 +322,22 @@ const CommentList = ({ comments }) => {
   );
 };
 
-// --- Input Bar ---
-const InputBar = () => {
+// --- Input Bar (Stealth Auto Mode) ---
+const InputBar = ({ isAutoActive, onToggleAuto }) => {
   const [message, setMessage] = useState('');
-  const handleSend = () => {
-    if (message.trim()) { console.log('Sending message:', message); setMessage(''); }
+
+  const handleSendAction = () => {
+    if (message.trim()) {
+      // 1. ถ้ามีข้อความ -> ส่งข้อความ
+      console.log('Sending message:', message);
+      setMessage('');
+    } else {
+      // 2. ถ้าช่องว่าง -> สลับโหมด Auto (แต่หน้าตาปุ่มเหมือนเดิม)
+      onToggleAuto();
+    }
   };
+
   return (
-    // Update: เพิ่ม pb-[env(safe-area-inset-bottom)] เพื่อหลบ Home Bar ของ iPhone
     <div className="absolute bottom-0 left-0 right-0 z-20 bg-white backdrop-blur-md border-t border-gray-200 shadow-2xl pb-[env(safe-area-inset-bottom)]">
       <div className="flex items-center gap-2.5 p-3">
         <button className="p-2.5 rounded-full bg-orange-500 hover:bg-orange-600 transition-all shadow-lg text-white">
@@ -345,14 +347,15 @@ const InputBar = () => {
           type="text"
           value={message}
           onChange={(e) => setMessage(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+          onKeyDown={(e) => e.key === 'Enter' && handleSendAction()}
+          // แก้ className กลับเป็นปกติ ไม่มีสีเขียวแจ้งเตือน
           placeholder="แสดงความคิดเห็น..."
           className="flex-1 px-4 py-2.5 bg-gray-100 rounded-full text-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:bg-white transition-all"
         />
         <button
-          onClick={handleSend}
-          disabled={!message.trim()}
-          className="p-2.5 rounded-full bg-orange-500 hover:bg-orange-600 disabled:bg-gray-300 transition-all shadow-lg text-white"
+          onClick={handleSendAction}
+          // แก้ปุ่มกลับเป็นสีส้ม + ไอคอน Send เสมอ (เนียน)
+          className="p-2.5 rounded-full bg-orange-500 hover:bg-orange-600 transition-all shadow-lg text-white"
         >
           <Send size={24} />
         </button>
@@ -367,26 +370,38 @@ export default function App() {
   const [commentIndex, setCommentIndex] = useState(1);
   const seller = MOCK_DATA[0];
 
-  // UI State
   const [viewerCount, setViewerCount] = useState(1250);
-  const [showAutoLikes, setShowAutoLikes] = useState(true);
-  const [stickersState, setStickersState] = useState({ top: true, middle: true, bottom: true });
+  const [showAutoLikes, setShowAutoLikes] = useState(false);
+  const [stickersState, setStickersState] = useState({ top: false, middle: false, bottom: false });
   
-  // Background/Camera State
   const [showSettings, setShowSettings] = useState(false);
   const [bgMode, setBgMode] = useState('video');
   const [bgColor, setBgColor] = useState('#00FF00');
   const [selectedDeviceId, setSelectedDeviceId] = useState(null);
 
+  const [isAutoFlowing, setIsAutoFlowing] = useState(false);
+
   useEffect(() => {
     if (commentIndex > 1 && commentIndex <= MOCK_DATA.length) {
       setVisibleComments(prev => [...prev, MOCK_DATA[commentIndex - 1]]);
+    } else if (commentIndex > MOCK_DATA.length) {
+       setCommentIndex(1);
     }
   }, [commentIndex]);
 
   useEffect(() => {
+    let interval;
+    if (isAutoFlowing) {
+      interval = setInterval(() => {
+        setCommentIndex(prev => prev + 1);
+      }, 3000); // 3 วินาทีตามที่ขอ
+    }
+    return () => clearInterval(interval);
+  }, [isAutoFlowing]);
+
+  useEffect(() => {
     const addComment = () => {
-      if (commentIndex < MOCK_DATA.length) setCommentIndex(prev => prev + 1);
+      setCommentIndex(prev => prev + 1);
     };
 
     const handleKeyDown = (e) => {
@@ -401,6 +416,11 @@ export default function App() {
       if (e.key === '[' || e.key === 'บ') { setViewerCount(prev => Math.max(0, prev - 10)); }
       if (e.key === ']' || e.key === 'ล') { setViewerCount(prev => prev + 10); }
       if (e.key === 'c' || e.key === 'C' || e.key === 'แ') { e.preventDefault(); setShowSettings(prev => !prev); }
+      
+      if (e.key === 'a' || e.key === 'A' || e.key === 'ฟ') { 
+        e.preventDefault(); 
+        setIsAutoFlowing(prev => !prev); 
+      }
     };
 
     window.addEventListener('keydown', handleKeyDown);
@@ -408,8 +428,6 @@ export default function App() {
   }, [commentIndex]);
 
   return (
-    // Update: ใช้ h-[100dvh] แทน h-screen เพื่อรองรับ Mobile Browser Bar ได้ดีขึ้น
-    // touch-action-none ป้องกันการเด้ง (Elastic Scrolling) ของ iOS
     <div className="relative w-full h-[100dvh] overflow-hidden bg-black touch-none">
       <style>{`
         @keyframes slide-up { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
@@ -443,15 +461,15 @@ export default function App() {
         setDeviceId={setSelectedDeviceId}
       />
 
-      {/* Update: ส่งฟังก์ชัน setShowSettings ไปให้ Header */}
       <Header 
         username={seller.username} 
         profilePicture={seller.profilePicture} 
         viewerCount={viewerCount} 
         onSettingsClick={() => setShowSettings(prev => !prev)}
+        isAutoActive={isAutoFlowing} // ส่งค่าสถานะ Auto ไปให้ Header
       />
 
-      <div className="absolute top-40 right-6 z-10 flex flex-col gap-8 pointer-events-none">
+      <div className="hidden md:flex absolute top-40 right-6 z-10 flex-col gap-8 pointer-events-none">
         <FloatingSticker src={STICKER_ASSETS.HEART} delay="0s" visible={stickersState.top} />
         <FloatingSticker src={STICKER_ASSETS.THUMBS_UP} size="w-24 h-24" delay="0.5s" visible={stickersState.middle} />
         <FloatingSticker src={STICKER_ASSETS.LAUGH} delay="1s" visible={stickersState.bottom} />
@@ -459,7 +477,11 @@ export default function App() {
 
       <LikeStream isVisible={showAutoLikes} />
       <CommentList comments={visibleComments} />
-      <InputBar />
+      
+      <InputBar 
+        isAutoActive={isAutoFlowing} 
+        onToggleAuto={() => setIsAutoFlowing(prev => !prev)} 
+      />
     </div>
   );
 }
