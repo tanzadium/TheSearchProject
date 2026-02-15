@@ -4,8 +4,8 @@ import MOCK_DATA from '../data/MockData';
 
 // --- Assets & Data ---
 const STICKER_ASSETS = {
-  PRE499: "/sticker/dis499.png",
-  THUMBS_UP: "/sticker/dis499.png",
+  PRE499: "/sticker/box199.png",
+  THUMBS_UP: "/sticker/boxpre499.png", // รูปที่จะเปลี่ยนเมื่อกดเลข 4
   LAUGH: "/sticker/199discount.png",
   WOW: "/sticker/199discount.png",
   LIKE_HEART: "https://cdn-icons-png.flaticon.com/512/833/833472.png",
@@ -121,6 +121,7 @@ const ShoppingCartCard = ({ item, onClose }) => {
         <h3 className="text-gray-900 text-sm font-medium leading-tight line-clamp-2">{item.name}</h3>
         <div className="flex items-end justify-between mt-1">
           <div className="flex flex-col leading-none">
+            {/* ซ่อนราคาเดิมไว้ตามโค้ดของคุณ */}
             {/* <span className="text-xs text-gray-400 line-through">฿{item.originalPrice}</span> */}
             <span className="text-red-600 text-xl font-bold">฿{item.price}</span>
           </div>
@@ -206,11 +207,15 @@ const InputBar = ({ isAutoActive, onToggleAuto, onToggleProduct }) => {
 // MAIN APP & UTILS
 // ==========================================
 
-const FloatingSticker = ({ src, size = "w-20 h-20", delay = "0s", visible = true }) => (
-  <div className={`${size} animate-float-bob filter drop-shadow-xl transition-all duration-500 ease-in-out`} style={{ animationDelay: delay, opacity: visible ? 1 : 0, transform: visible ? 'scale(1)' : 'scale(0)' }}>
-    <img src={src} alt="sticker" className="w-full h-full object-contain" />
-  </div>
-);
+const FloatingSticker = ({ src, size = "w-20 h-20", delay = "0s", visible = true }) => {
+  // ไม่ render อะไรเลยถ้าไม่มี src หรือไม่ได้ให้ visible
+  if (!src) return null;
+  return (
+    <div className={`${size} animate-float-bob filter drop-shadow-xl transition-all duration-500 ease-in-out`} style={{ animationDelay: delay, opacity: visible ? 1 : 0, transform: visible ? 'scale(1)' : 'scale(0)' }}>
+      <img src={src} alt="sticker" className="w-full h-full object-contain" />
+    </div>
+  );
+};
 
 // --- Like Stream ฝั่งขวา ---
 const LikeStream = ({ isVisible }) => {
@@ -241,8 +246,14 @@ export default function App() {
   const [visibleComments, setVisibleComments] = useState([]);
   const [commentIndex, setCommentIndex] = useState(1);
   const [viewerCount, setViewerCount] = useState(1250);
-  const [showAutoLikes, setShowAutoLikes] = useState(true); // เฉพาะฝั่งขวา
-  const [stickersState, setStickersState] = useState({ top: true, middle: true, bottom: false });
+  const [showAutoLikes, setShowAutoLikes] = useState(true);
+  
+  // --- เปลี่ยนระบบสติ๊กเกอร์ฝั่งขวา ---
+  // ให้ activeSticker เก็บ ID ของสติ๊กเกอร์ที่ใช้อยู่ เช่น 'PRE499' หรือ 'THUMBS_UP' (ถ้าเป็น null คือซ่อน)
+  const [activeSticker, setActiveSticker] = useState('PRE499'); 
+  // เก็บสถานะว่าโดยรวมเปิดหรือปิดการโชว์สติ๊กเกอร์อยู่ (ใช้ร่วมกับปุ่ม H)
+  const [isStickerVisible, setIsStickerVisible] = useState(true);
+
   const [showSettings, setShowSettings] = useState(false);
   const [bgMode, setBgMode] = useState('video');
   const [bgColor, setBgColor] = useState('#FF00FF');
@@ -288,9 +299,17 @@ export default function App() {
       if (document.activeElement.tagName === 'INPUT') return;
       if (e.code === 'Space') { e.preventDefault(); setCommentIndex(prev => prev < MOCK_DATA.length ? prev + 1 : prev); }
       if (e.key === 'r' || e.key === 'R') window.location.reload();
-      if (e.key === 'h' || e.key === 'H') setStickersState(prev => ({ ...prev, top: !prev.top }));
-      if (e.key === 'j' || e.key === 'J') setStickersState(prev => ({ ...prev, bottom: !prev.bottom }));
-      if (e.key === 'k' || e.key === 'K') setStickersState(prev => ({ ...prev, middle: !prev.middle }));
+      
+      // --- อัปเดต Hotkeys สำหรับ Sticker ---
+      // กด 4: สลับไปมา ระหว่าง PRE499 กับ THUMBS_UP
+      if (e.key === '4' || e.key === '๔') {
+        setActiveSticker(prev => prev === 'PRE499' ? 'THUMBS_UP' : 'PRE499');
+      }
+      // กด H (หรือ ้): เปิด/ปิดการแสดงผลสติ๊กเกอร์ทั้งหมด
+      if (e.key === 'h' || e.key === 'H' || e.key === '้') {
+        setIsStickerVisible(prev => !prev);
+      }
+
       if (e.key === 'c' || e.key === 'C') setShowSettings(prev => !prev);
       if (e.key === 'a' || e.key === 'A') setIsAutoFlowing(prev => !prev);
       if (e.key === 's' || e.key === 'S') setShowProductCard(prev => !prev);
@@ -325,10 +344,16 @@ export default function App() {
       <SettingsMenu isOpen={showSettings} onClose={() => setShowSettings(false)} mode={bgMode} setMode={setBgMode} color={bgColor} setColor={setBgColor} currentDeviceId={selectedDeviceId} setDeviceId={setSelectedDeviceId} />
       <Header username={MOCK_DATA[0].username} profilePicture={MOCK_DATA[0].profilePicture} viewerCount={viewerCount} onSettingsClick={() => setShowSettings(p => !p)} isAutoActive={isAutoFlowing} />
 
+      {/* สติ๊กเกอร์ (สลับรูปภาพตาม state activeSticker) */}
       <div className="hidden md:flex absolute top-40 right-6 z-10 flex-col gap-8 pointer-events-none">
-        <FloatingSticker src={STICKER_ASSETS.PRE499} delay="0s" visible={stickersState.top} />
-        <FloatingSticker src={STICKER_ASSETS.THUMBS_UP} size="w-24 h-24" delay="0.5s" visible={stickersState.middle} />
-        <FloatingSticker src={STICKER_ASSETS.LAUGH} delay="1s" visible={stickersState.bottom} />
+        <FloatingSticker 
+           // เลือก asset ตามค่า activeSticker
+           src={STICKER_ASSETS[activeSticker]} 
+           // ปรับขนาดถ้าเป็น THUMBS_UP ให้ใหญ่หน่อย (คุณปรับแต่งขนาดตรงนี้ได้)
+           size={activeSticker === 'THUMBS_UP' ? "w-24 h-24" : "w-20 h-20"} 
+           delay="0s" 
+           visible={isStickerVisible} // โชว์หรือซ่อนขึ้นอยู่กับ state isStickerVisible (ปุ่ม H)
+        />
       </div>
 
       {/* --- LIKE STREAM --- */}
