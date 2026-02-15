@@ -4,8 +4,8 @@ import MOCK_DATA from '../data/MockData';
 
 // --- Assets & Data ---
 const STICKER_ASSETS = {
-  PRE499: "/public/sticker/Untitled_Artwork4.png",
-  THUMBS_UP: "/public/sticker/Untitled_Artwork4.png",
+  PRE499: "/public/sticker/dis499.png",
+  THUMBS_UP: "/public/sticker/dis499.png",
   LAUGH: "/public/sticker/199discount.png",
   WOW: "/public/sticker/199discount.png",
   LIKE_HEART: "https://cdn-icons-png.flaticon.com/512/833/833472.png",
