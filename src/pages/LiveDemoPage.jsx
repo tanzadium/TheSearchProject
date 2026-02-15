@@ -260,7 +260,11 @@ const LikeStream = ({ isVisible }) => {
   return (
     <div className="hidden md:block absolute bottom-24 right-32 w-48 h-96 pointer-events-none z-0 overflow-hidden">
       {hearts.map(heart => (
+<<<<<<< HEAD
         <div key={heart.id} className="absolute bottom-0 w-24 h-24 animate-float-up-fade" style={{ left: `${heart.left}%`, animationDuration: heart.animationDuration, transform: `scale(${heart.scale})` }}>
+=======
+        <div key={heart.id} className="absolute bottom-0 w-14 h-14 animate-float-up-fade" style={{ left: `${heart.left}%`, animationDuration: heart.animationDuration, transform: `scale(${heart.scale})` }}>
+>>>>>>> e851491 (new)
           <img src={STICKER_ASSETS.LIKE_HEART} alt="like" className="w-full h-full object-contain opacity-90" />
         </div>
       ))}
