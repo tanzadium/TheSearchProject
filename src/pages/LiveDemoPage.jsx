@@ -4,12 +4,11 @@ import MOCK_DATA from '../data/MockData';
 
 // --- Assets & Data ---
 const STICKER_ASSETS = {
-  DIS199: "/public/sticker/199discount.png",
-  THUMBS_UP: "/public/sticker/199discount.png",
+  PRE499: "/public/sticker/Untitled_Artwork4.png",
+  THUMBS_UP: "/public/sticker/Untitled_Artwork4.png",
   LAUGH: "/public/sticker/199discount.png",
   WOW: "/public/sticker/199discount.png",
-  LIKE_HEART: "/public/sticker/199discount.png",
-  USER_LIKE: "https://cdn-icons-png.flaticon.com/512/833/833472.png" // ไอคอนสำหรับไลก์ฝั่งซ้าย
+  LIKE_HEART: "https://cdn-icons-png.flaticon.com/512/833/833472.png",
 };
 
 // ==========================================
@@ -19,8 +18,7 @@ const PRODUCT_DATA = {
   id: 1,
   name: "กล่องสุ่มลุ้นโชค", 
   price: "199", 
-  originalPrice: "399",
-  image: "/shopping/box.png" 
+  image: "/sticker/box.png" 
 };
 
 // --- Helper: Format Number ---
@@ -123,8 +121,8 @@ const ShoppingCartCard = ({ item, onClose }) => {
         <h3 className="text-gray-900 text-sm font-medium leading-tight line-clamp-2">{item.name}</h3>
         <div className="flex items-end justify-between mt-1">
           <div className="flex flex-col leading-none">
-            <span className="text-xs text-gray-400 line-through">฿{item.originalPrice}</span>
-            <span className="text-red-600 text-lg font-bold">฿{item.price}</span>
+            {/* <span className="text-xs text-gray-400 line-through">฿{item.originalPrice}</span> */}
+            <span className="text-red-600 text-xl font-bold">฿{item.price}</span>
           </div>
           <button className="bg-red-600 text-white text-xs font-bold px-4 py-1.5 rounded-full hover:bg-red-700 shadow-sm transition-transform active:scale-95">ซื้อเลย</button>
         </div>
@@ -214,7 +212,7 @@ const FloatingSticker = ({ src, size = "w-20 h-20", delay = "0s", visible = true
   </div>
 );
 
-// --- Like Stream ฝั่งขวา (กด Y) ---
+// --- Like Stream ฝั่งขวา ---
 const LikeStream = ({ isVisible }) => {
   const [hearts, setHearts] = useState([]);
   useEffect(() => {
@@ -229,40 +227,10 @@ const LikeStream = ({ isVisible }) => {
 
   if (!isVisible) return null;
   return (
-    <div className="hidden md:block absolute bottom-24 right-32 w-48 h-96 pointer-events-none z-0 overflow-hidden">
+    <div className="hidden md:block absolute bottom-24 right-0 w-48 h-96 pointer-events-none z-0 overflow-hidden">
       {hearts.map(heart => (
         <div key={heart.id} className="absolute bottom-0 w-14 h-14 animate-float-up-fade" style={{ left: `${heart.left}%`, animationDuration: heart.animationDuration, transform: `scale(${heart.scale})` }}>
           <img src={STICKER_ASSETS.LIKE_HEART} alt="like" className="w-full h-full object-contain opacity-90" />
-        </div>
-      ))}
-    </div>
-  );
-};
-
-// --- Left Like Stream ฝั่งซ้าย (กด L) ---
-const LeftLikeStream = ({ isVisible }) => {
-  const [hearts, setHearts] = useState([]);
-  useEffect(() => {
-    if (!isVisible) return;
-    const interval = setInterval(() => {
-      const newHeart = { 
-        id: Date.now(), 
-        left: Math.random() * 40 + 5, // สุ่มซ้าย 5% ถึง 45%
-        animationDuration: Math.random() * 2 + 3 + 's', 
-        scale: Math.random() * 0.5 + 0.6 // เล็กกว่าฝั่งขวานิดหน่อย
-      };
-      setHearts(prev => [...prev, newHeart]);
-      setTimeout(() => { setHearts(prev => prev.filter(h => h.id !== newHeart.id)); }, 3500); 
-    }, 450); 
-    return () => clearInterval(interval);
-  }, [isVisible]);
-
-  if (!isVisible) return null;
-  return (
-    <div className="hidden md:block absolute bottom-32 left-8 w-64 h-80 pointer-events-none z-0 overflow-hidden">
-      {hearts.map(heart => (
-        <div key={heart.id} className="absolute bottom-0 w-10 h-10 animate-float-up-fade" style={{ left: `${heart.left}%`, animationDuration: heart.animationDuration, transform: `scale(${heart.scale})` }}>
-          <img src={STICKER_ASSETS.USER_LIKE} alt="user_like" className="w-full h-full object-contain opacity-80" />
         </div>
       ))}
     </div>
@@ -273,12 +241,11 @@ export default function App() {
   const [visibleComments, setVisibleComments] = useState([]);
   const [commentIndex, setCommentIndex] = useState(1);
   const [viewerCount, setViewerCount] = useState(1250);
-  const [showAutoLikes, setShowAutoLikes] = useState(true); // ขวา
-  const [showUserLikes, setShowUserLikes] = useState(true); // ซ้าย
-  const [stickersState, setStickersState] = useState({ top: true, middle: true, bottom: true });
+  const [showAutoLikes, setShowAutoLikes] = useState(true); // เฉพาะฝั่งขวา
+  const [stickersState, setStickersState] = useState({ top: true, middle: true, bottom: false });
   const [showSettings, setShowSettings] = useState(false);
   const [bgMode, setBgMode] = useState('video');
-  const [bgColor, setBgColor] = useState('#00FF00');
+  const [bgColor, setBgColor] = useState('#FF00FF');
   const [selectedDeviceId, setSelectedDeviceId] = useState(null);
   const [isAutoFlowing, setIsAutoFlowing] = useState(false);
   const [showProductCard, setShowProductCard] = useState(true);
@@ -327,8 +294,8 @@ export default function App() {
       if (e.key === 'c' || e.key === 'C') setShowSettings(prev => !prev);
       if (e.key === 'a' || e.key === 'A') setIsAutoFlowing(prev => !prev);
       if (e.key === 's' || e.key === 'S') setShowProductCard(prev => !prev);
+      // กด Y (หรือ ั) เพื่อเปิด/ปิด Like Stream ฝั่งขวา
       if (e.key === 'y' || e.key === 'Y' || e.key === 'ั') setShowAutoLikes(prev => !prev);
-      if (e.key === 'l' || e.key === 'L' || e.key === 'ส') setShowUserLikes(prev => !prev);
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
@@ -359,23 +326,19 @@ export default function App() {
       <Header username={MOCK_DATA[0].username} profilePicture={MOCK_DATA[0].profilePicture} viewerCount={viewerCount} onSettingsClick={() => setShowSettings(p => !p)} isAutoActive={isAutoFlowing} />
 
       <div className="hidden md:flex absolute top-40 right-6 z-10 flex-col gap-8 pointer-events-none">
-        <FloatingSticker src={STICKER_ASSETS.DIS199} delay="0s" visible={stickersState.top} />
+        <FloatingSticker src={STICKER_ASSETS.PRE499} delay="0s" visible={stickersState.top} />
         <FloatingSticker src={STICKER_ASSETS.THUMBS_UP} size="w-24 h-24" delay="0.5s" visible={stickersState.middle} />
         <FloatingSticker src={STICKER_ASSETS.LAUGH} delay="1s" visible={stickersState.bottom} />
       </div>
 
+      {/* --- LIKE STREAM --- */}
       <LikeStream isVisible={showAutoLikes} />
-      <LeftLikeStream isVisible={showUserLikes} />
       
       {/* --- LAYER 3: SECTIONS --- */}
-      
-      {/* SECTION: SHOPPING CARD */}
       {showProductCard && <ShoppingCartCard item={PRODUCT_DATA} onClose={() => setShowProductCard(false)} />}
       
-      {/* SECTION: COMMENT */}
       <CommentList comments={visibleComments} hasProductCard={showProductCard} />
       
-      {/* SECTION: INPUT */}
       <InputBar isAutoActive={isAutoFlowing} onToggleAuto={() => setIsAutoFlowing(p => !p)} onToggleProduct={() => setShowProductCard(p => !p)} />
       
     </div>
