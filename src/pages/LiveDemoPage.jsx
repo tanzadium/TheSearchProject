@@ -4,19 +4,23 @@ import MOCK_DATA from '../data/MockData';
 
 // --- Assets & Data ---
 const STICKER_ASSETS = {
-  HEART: "https://cdn-icons-png.flaticon.com/512/2107/2107945.png",
-  THUMBS_UP: "https://cdn-icons-png.flaticon.com/512/456/456115.png",
-  LAUGH: "https://cdn-icons-png.flaticon.com/512/1933/1933691.png",
-  WOW: "https://cdn-icons-png.flaticon.com/512/1933/1933585.png",
-  LIKE_HEART: "https://cdn-icons-png.flaticon.com/512/833/833472.png"
+  DIS199: "/public/sticker/199discount.png",
+  THUMBS_UP: "/public/sticker/199discount.png",
+  LAUGH: "/public/sticker/199discount.png",
+  WOW: "/public/sticker/199discount.png",
+  LIKE_HEART: "/public/sticker/199discount.png",
+  USER_LIKE: "https://cdn-icons-png.flaticon.com/512/833/833472.png" // ไอคอนสำหรับไลก์ฝั่งซ้าย
 };
 
+// ==========================================
+// ส่วนแก้ไขข้อมูลสินค้า (EDIT HERE)
+// ==========================================
 const PRODUCT_DATA = {
   id: 1,
-  name: "เสื้อยืด Oversize ลายกราฟิก สุดเท่ ผ้า Cotton 100% ใส่สบายมาก ระบายอากาศดีเยี่ยม",
-  price: "159",
-  originalPrice: "290",
-  image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+  name: "กล่องสุ่มลุ้นโชค", 
+  price: "199", 
+  originalPrice: "399",
+  image: "/shopping/box.png" 
 };
 
 // --- Helper: Format Number ---
@@ -110,47 +114,22 @@ const SettingsMenu = ({ isOpen, mode, setMode, color, setColor, currentDeviceId,
 const ShoppingCartCard = ({ item, onClose }) => {
   if (!item) return null;
   return (
-    // ปรับ w-80 (กว้างขึ้น), p-3 (padding เพิ่มขึ้น)
     <div className="absolute bottom-24 left-4 z-20 w-80 bg-white rounded-xl shadow-2xl p-3 flex items-center gap-4 animate-slide-up font-sans border border-gray-100">
-      
-      {/* รูปสินค้า: ขยายเป็น w-20 h-20 (ใหญ่ขึ้น) */}
       <div className="relative w-20 h-20 shrink-0">
-        <img 
-          src={item.image} 
-          alt={item.name} 
-          className="w-full h-full object-cover rounded-lg border border-gray-100" 
-        />
-        <div className="absolute top-0 left-0 bg-black/60 text-white text-[10px] px-1.5 py-0.5 rounded-tl-lg rounded-br-lg">
-          1
-        </div>
+        <img src={item.image} alt={item.name} className="w-full h-full object-cover rounded-lg border border-gray-100" />
+        <div className="absolute top-0 left-0 bg-black/60 text-white text-[10px] px-1.5 py-0.5 rounded-tl-lg rounded-br-lg">1</div>
       </div>
-
       <div className="flex-1 min-w-0 flex flex-col justify-between h-20 py-0.5">
-        {/* ชื่อสินค้า: text-sm (ใหญ่ขึ้นนิดนึง) */}
-        <h3 className="text-gray-900 text-sm font-medium leading-tight line-clamp-2">
-          {item.name}
-        </h3>
-        
+        <h3 className="text-gray-900 text-sm font-medium leading-tight line-clamp-2">{item.name}</h3>
         <div className="flex items-end justify-between mt-1">
           <div className="flex flex-col leading-none">
             <span className="text-xs text-gray-400 line-through">฿{item.originalPrice}</span>
-            {/* ราคา: text-lg (ใหญ่และชัด) */}
             <span className="text-red-600 text-lg font-bold">฿{item.price}</span>
           </div>
-          {/* ปุ่มซื้อ: ปรับ padding */}
-          <button className="bg-red-600 text-white text-xs font-bold px-4 py-1.5 rounded-full hover:bg-red-700 shadow-sm transition-transform active:scale-95">
-            ซื้อเลย
-          </button>
+          <button className="bg-red-600 text-white text-xs font-bold px-4 py-1.5 rounded-full hover:bg-red-700 shadow-sm transition-transform active:scale-95">ซื้อเลย</button>
         </div>
       </div>
-
-      {/* ปุ่มปิด */}
-      <button 
-        onClick={onClose} 
-        className="absolute -top-2 -right-2 bg-white text-gray-400 hover:text-red-500 rounded-full p-1 shadow-md border border-gray-100"
-      >
-        <X size={14} />
-      </button>
+      <button onClick={onClose} className="absolute -top-2 -right-2 bg-white text-gray-400 hover:text-red-500 rounded-full p-1 shadow-md border border-gray-100"><X size={14} /></button>
     </div>
   );
 };
@@ -171,7 +150,7 @@ const CommentItem = ({ profilePicture, username, comment }) => (
   </div>
 );
 
-const CommentList = ({ comments }) => {
+const CommentList = ({ comments, hasProductCard }) => {
   const listRef = useRef(null);
   const [autoScroll, setAutoScroll] = useState(true);
 
@@ -189,7 +168,9 @@ const CommentList = ({ comments }) => {
     <div 
       ref={listRef} 
       onScroll={handleScroll} 
-      className="absolute bottom-20 left-0 right-0 z-10 px-4 h-[45vh] flex flex-col justify-end overflow-y-auto pb-[calc(1rem+env(safe-area-inset-bottom))]" 
+      className={`absolute left-0 right-0 z-10 px-4 flex flex-col justify-end overflow-y-auto pb-[calc(1rem+env(safe-area-inset-bottom))] transition-all duration-300 ease-in-out
+        ${hasProductCard ? 'bottom-56 h-[35vh]' : 'bottom-24 h-[45vh]'}
+      `}
       style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitMaskImage: 'linear-gradient(to bottom, transparent 0px, black 80px)', maskImage: 'linear-gradient(to bottom, transparent 0px, black 80px)' }}
     >
       {comments.map((comment, index) => <CommentItem key={comment.id || index} {...comment} />)}
@@ -211,22 +192,10 @@ const InputBar = ({ isAutoActive, onToggleAuto, onToggleProduct }) => {
   return (
     <div className="absolute bottom-0 left-0 right-0 z-20 bg-white backdrop-blur-md border-t border-gray-200 shadow-2xl pb-[env(safe-area-inset-bottom)]">
       <div className="flex items-center gap-2.5 p-3">
-        {/* ปุ่มรถเข็น (Toggle Product) */}
         <button onClick={onToggleProduct} className="p-2.5 rounded-full bg-orange-500 hover:bg-orange-600 transition-all shadow-lg text-white">
           <ShoppingCart size={24} />
         </button>
-        
-        {/* ช่องพิมพ์ */}
-        <input 
-          type="text" 
-          value={message} 
-          onChange={(e) => setMessage(e.target.value)} 
-          onKeyDown={(e) => e.key === 'Enter' && handleSendAction()} 
-          placeholder="แสดงความคิดเห็น..." 
-          className="flex-1 px-4 py-2.5 bg-gray-100 rounded-full text-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:bg-white transition-all" 
-        />
-        
-        {/* ปุ่มส่ง (Hidden Auto Toggle) */}
+        <input type="text" value={message} onChange={(e) => setMessage(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleSendAction()} placeholder="แสดงความคิดเห็น..." className="flex-1 px-4 py-2.5 bg-gray-100 rounded-full text-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:bg-white transition-all" />
         <button onClick={handleSendAction} className="p-2.5 rounded-full bg-orange-500 hover:bg-orange-600 transition-all shadow-lg text-white">
           <Send size={24} />
         </button>
@@ -236,7 +205,7 @@ const InputBar = ({ isAutoActive, onToggleAuto, onToggleProduct }) => {
 };
 
 // ==========================================
-// MAIN APP & STICKER UTILS
+// MAIN APP & UTILS
 // ==========================================
 
 const FloatingSticker = ({ src, size = "w-20 h-20", delay = "0s", visible = true }) => (
@@ -245,6 +214,7 @@ const FloatingSticker = ({ src, size = "w-20 h-20", delay = "0s", visible = true
   </div>
 );
 
+// --- Like Stream ฝั่งขวา (กด Y) ---
 const LikeStream = ({ isVisible }) => {
   const [hearts, setHearts] = useState([]);
   useEffect(() => {
@@ -256,16 +226,43 @@ const LikeStream = ({ isVisible }) => {
     }, 300);
     return () => clearInterval(interval);
   }, [isVisible]);
+
   if (!isVisible) return null;
   return (
     <div className="hidden md:block absolute bottom-24 right-32 w-48 h-96 pointer-events-none z-0 overflow-hidden">
       {hearts.map(heart => (
-<<<<<<< HEAD
-        <div key={heart.id} className="absolute bottom-0 w-24 h-24 animate-float-up-fade" style={{ left: `${heart.left}%`, animationDuration: heart.animationDuration, transform: `scale(${heart.scale})` }}>
-=======
         <div key={heart.id} className="absolute bottom-0 w-14 h-14 animate-float-up-fade" style={{ left: `${heart.left}%`, animationDuration: heart.animationDuration, transform: `scale(${heart.scale})` }}>
->>>>>>> e851491 (new)
           <img src={STICKER_ASSETS.LIKE_HEART} alt="like" className="w-full h-full object-contain opacity-90" />
+        </div>
+      ))}
+    </div>
+  );
+};
+
+// --- Left Like Stream ฝั่งซ้าย (กด L) ---
+const LeftLikeStream = ({ isVisible }) => {
+  const [hearts, setHearts] = useState([]);
+  useEffect(() => {
+    if (!isVisible) return;
+    const interval = setInterval(() => {
+      const newHeart = { 
+        id: Date.now(), 
+        left: Math.random() * 40 + 5, // สุ่มซ้าย 5% ถึง 45%
+        animationDuration: Math.random() * 2 + 3 + 's', 
+        scale: Math.random() * 0.5 + 0.6 // เล็กกว่าฝั่งขวานิดหน่อย
+      };
+      setHearts(prev => [...prev, newHeart]);
+      setTimeout(() => { setHearts(prev => prev.filter(h => h.id !== newHeart.id)); }, 3500); 
+    }, 450); 
+    return () => clearInterval(interval);
+  }, [isVisible]);
+
+  if (!isVisible) return null;
+  return (
+    <div className="hidden md:block absolute bottom-32 left-8 w-64 h-80 pointer-events-none z-0 overflow-hidden">
+      {hearts.map(heart => (
+        <div key={heart.id} className="absolute bottom-0 w-12 h-12 animate-float-up-fade" style={{ left: `${heart.left}%`, animationDuration: heart.animationDuration, transform: `scale(${heart.scale})` }}>
+          <img src={STICKER_ASSETS.USER_LIKE} alt="user_like" className="w-full h-full object-contain opacity-80" />
         </div>
       ))}
     </div>
@@ -276,7 +273,8 @@ export default function App() {
   const [visibleComments, setVisibleComments] = useState([]);
   const [commentIndex, setCommentIndex] = useState(1);
   const [viewerCount, setViewerCount] = useState(1250);
-  const [showAutoLikes, setShowAutoLikes] = useState(true);
+  const [showAutoLikes, setShowAutoLikes] = useState(true); // ขวา
+  const [showUserLikes, setShowUserLikes] = useState(true); // ซ้าย
   const [stickersState, setStickersState] = useState({ top: true, middle: true, bottom: true });
   const [showSettings, setShowSettings] = useState(false);
   const [bgMode, setBgMode] = useState('video');
@@ -285,7 +283,7 @@ export default function App() {
   const [isAutoFlowing, setIsAutoFlowing] = useState(false);
   const [showProductCard, setShowProductCard] = useState(true);
 
-  // Effects
+  // Effects (Comment Flow)
   useEffect(() => { if (commentIndex > 1 && commentIndex <= MOCK_DATA.length) setVisibleComments(prev => [...prev, MOCK_DATA[commentIndex - 1]]); }, [commentIndex]);
   useEffect(() => {
     let interval;
@@ -300,6 +298,7 @@ export default function App() {
     return () => clearInterval(interval);
   }, [isAutoFlowing]);
 
+  // Effects (Viewer Count)
   useEffect(() => {
     let timeoutId;
     const updateViewerCount = () => {
@@ -316,6 +315,7 @@ export default function App() {
     return () => clearTimeout(timeoutId);
   }, []);
 
+  // Effects (Keyboard Shortcuts)
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (document.activeElement.tagName === 'INPUT') return;
@@ -324,9 +324,11 @@ export default function App() {
       if (e.key === 'h' || e.key === 'H') setStickersState(prev => ({ ...prev, top: !prev.top }));
       if (e.key === 'j' || e.key === 'J') setStickersState(prev => ({ ...prev, bottom: !prev.bottom }));
       if (e.key === 'k' || e.key === 'K') setStickersState(prev => ({ ...prev, middle: !prev.middle }));
-      if (e.key === 'y' || e.key === 'Y') setShowAutoLikes(prev => !prev);
       if (e.key === 'c' || e.key === 'C') setShowSettings(prev => !prev);
       if (e.key === 'a' || e.key === 'A') setIsAutoFlowing(prev => !prev);
+      if (e.key === 's' || e.key === 'S') setShowProductCard(prev => !prev);
+      if (e.key === 'y' || e.key === 'Y' || e.key === 'ั') setShowAutoLikes(prev => !prev);
+      if (e.key === 'l' || e.key === 'L' || e.key === 'ส') setShowUserLikes(prev => !prev);
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
@@ -357,25 +359,25 @@ export default function App() {
       <Header username={MOCK_DATA[0].username} profilePicture={MOCK_DATA[0].profilePicture} viewerCount={viewerCount} onSettingsClick={() => setShowSettings(p => !p)} isAutoActive={isAutoFlowing} />
 
       <div className="hidden md:flex absolute top-40 right-6 z-10 flex-col gap-8 pointer-events-none">
-        <FloatingSticker src={STICKER_ASSETS.HEART} delay="0s" visible={stickersState.top} />
+        <FloatingSticker src={STICKER_ASSETS.DIS199} delay="0s" visible={stickersState.top} />
         <FloatingSticker src={STICKER_ASSETS.THUMBS_UP} size="w-24 h-24" delay="0.5s" visible={stickersState.middle} />
         <FloatingSticker src={STICKER_ASSETS.LAUGH} delay="1s" visible={stickersState.bottom} />
       </div>
 
       <LikeStream isVisible={showAutoLikes} />
+      <LeftLikeStream isVisible={showUserLikes} />
       
       {/* --- LAYER 3: SECTIONS --- */}
       
-      <div className='flex-col '>
-        {/* SECTION: SHOPPING CARD */}
+      {/* SECTION: SHOPPING CARD */}
       {showProductCard && <ShoppingCartCard item={PRODUCT_DATA} onClose={() => setShowProductCard(false)} />}
       
       {/* SECTION: COMMENT */}
-      <CommentList comments={visibleComments} />
+      <CommentList comments={visibleComments} hasProductCard={showProductCard} />
       
       {/* SECTION: INPUT */}
       <InputBar isAutoActive={isAutoFlowing} onToggleAuto={() => setIsAutoFlowing(p => !p)} onToggleProduct={() => setShowProductCard(p => !p)} />
-      </div>
+      
     </div>
   );
 }
