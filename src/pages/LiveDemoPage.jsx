@@ -16,9 +16,9 @@ const STICKER_ASSETS = {
 // ==========================================
 const PRODUCT_DATA = {
   id: 1,
-  name: "กล่องสุ่มลุ้นโชค", 
-  price: "199", 
-  image: "/sticker/box.png" 
+  name: "กล่องสุ่มลุ้นโชค",
+  price: "199",
+  image: "/sticker/box.png"
 };
 
 // --- Helper: Format Number ---
@@ -62,7 +62,7 @@ const Header = ({ username, profilePicture, viewerCount, onSettingsClick, isAuto
     <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between p-6 pt-[max(1.5rem,env(safe-area-inset-top))] bg-gradient-to-b from-black/80 to-transparent transition-all">
       <div className="flex items-center gap-4">
         <div className="w-16 h-16 rounded-full border-2 overflow-hidden bg-gray-300 shadow-xl shrink-0">
-          <img src={profilePicture} alt={username} className="w-full h-full object-cover transform scale-110"/>
+          <img src={profilePicture} alt={username} className="w-full h-full object-cover transform scale-110" />
         </div>
         <div className="flex flex-col items-start gap-1">
           <span className="text-white font-bold text-xl drop-shadow-md tracking-wide">{username}</span>
@@ -92,14 +92,14 @@ const SettingsMenu = ({ isOpen, mode, setMode, color, setColor, currentDeviceId,
   if (!isOpen) return null;
   return (
     <div className="absolute top-28 left-6 z-50 bg-black/90 backdrop-blur-md p-4 rounded-xl border border-white/20 text-white shadow-2xl w-80 animate-slide-up max-w-[90vw]">
-      <div className="flex justify-between items-center mb-4"><h3 className="font-bold flex items-center gap-2 text-lg"><Settings size={20} /> ตั้งค่าพื้นหลัง</h3><button onClick={onClose}><X size={20}/></button></div>
+      <div className="flex justify-between items-center mb-4"><h3 className="font-bold flex items-center gap-2 text-lg"><Settings size={20} /> ตั้งค่าพื้นหลัง</h3><button onClick={onClose}><X size={20} /></button></div>
       <div className="flex bg-gray-800 rounded-lg p-1 mb-4">
         <button onClick={() => setMode('video')} className={`flex-1 py-2 rounded-md text-sm ${mode === 'video' ? 'bg-gray-600' : ''}`}>กล้อง</button>
         <button onClick={() => setMode('color')} className={`flex-1 py-2 rounded-md text-sm ${mode === 'color' ? 'bg-gray-600' : ''}`}>สี</button>
       </div>
       <div className="max-h-64 overflow-y-auto">
-        {mode === 'video' ? devices.map(d => <button key={d.deviceId} onClick={() => setDeviceId(d.deviceId)} className="block w-full text-left text-sm p-3 border-b border-gray-700 truncate">{d.label || `Cam ${d.deviceId.slice(0,5)}`}</button>) 
-        : <div className="grid grid-cols-2 gap-3">{['#00FF00','#FF00FF','#0000FF','#000000','#FFFFFF','#808080'].map(c => <button key={c} onClick={() => setColor(c)} className="flex items-center gap-2 p-2 border border-white/10 rounded"><div className="w-4 h-4 rounded-full" style={{backgroundColor:c}}/>{c}</button>)}</div>}
+        {mode === 'video' ? devices.map(d => <button key={d.deviceId} onClick={() => setDeviceId(d.deviceId)} className="block w-full text-left text-sm p-3 border-b border-gray-700 truncate">{d.label || `Cam ${d.deviceId.slice(0, 5)}`}</button>)
+          : <div className="grid grid-cols-2 gap-3">{['#00FF00', '#FF00FF', '#0000FF', '#000000', '#FFFFFF', '#808080'].map(c => <button key={c} onClick={() => setColor(c)} className="flex items-center gap-2 p-2 border border-white/10 rounded"><div className="w-4 h-4 rounded-full" style={{ backgroundColor: c }} />{c}</button>)}</div>}
       </div>
     </div>
   );
@@ -164,9 +164,9 @@ const CommentList = ({ comments, hasProductCard }) => {
   }, [comments, autoScroll]);
 
   return (
-    <div 
-      ref={listRef} 
-      onScroll={handleScroll} 
+    <div
+      ref={listRef}
+      onScroll={handleScroll}
       className={`absolute left-0 right-0 z-10 px-4 flex flex-col justify-end overflow-y-auto pb-[calc(1rem+env(safe-area-inset-bottom))] transition-all duration-300 ease-in-out
         ${hasProductCard ? 'bottom-56 h-[35vh]' : 'bottom-24 h-[45vh]'}
       `}
@@ -184,7 +184,7 @@ const CommentList = ({ comments, hasProductCard }) => {
 const InputBar = ({ isAutoActive, onToggleAuto, onToggleProduct }) => {
   const [message, setMessage] = useState('');
   const handleSendAction = () => {
-    if (message.trim()) { console.log('Sending:', message); setMessage(''); } 
+    if (message.trim()) { console.log('Sending:', message); setMessage(''); }
     else { onToggleAuto(); }
   };
 
@@ -247,10 +247,10 @@ export default function App() {
   const [commentIndex, setCommentIndex] = useState(1);
   const [viewerCount, setViewerCount] = useState(1250);
   const [showAutoLikes, setShowAutoLikes] = useState(true);
-  
+
   // --- เปลี่ยนระบบสติ๊กเกอร์ฝั่งขวา ---
   // ให้ activeSticker เก็บ ID ของสติ๊กเกอร์ที่ใช้อยู่ เช่น 'PRE499' หรือ 'THUMBS_UP' (ถ้าเป็น null คือซ่อน)
-  const [activeSticker, setActiveSticker] = useState('PRE499'); 
+  const [activeSticker, setActiveSticker] = useState('PRE499');
   // เก็บสถานะว่าโดยรวมเปิดหรือปิดการโชว์สติ๊กเกอร์อยู่ (ใช้ร่วมกับปุ่ม H)
   const [isStickerVisible, setIsStickerVisible] = useState(true);
 
@@ -262,18 +262,41 @@ export default function App() {
   const [showProductCard, setShowProductCard] = useState(true);
 
   // Effects (Comment Flow)
-  useEffect(() => { if (commentIndex > 1 && commentIndex <= MOCK_DATA.length) setVisibleComments(prev => [...prev, MOCK_DATA[commentIndex - 1]]); }, [commentIndex]);
+
+  // --- ตัวที่ 1: ต้องเก็บไว้! (ทำหน้าที่เอาคอมเมนต์ใหม่ไปต่อท้ายเพื่อโชว์บนจอ) ---
   useEffect(() => {
-    let interval;
-    if (isAutoFlowing) {
-      interval = setInterval(() => {
-        setCommentIndex(prev => {
-           if (prev >= MOCK_DATA.length) { setIsAutoFlowing(false); return prev; }
-           return prev + 1;
-        });
-      }, 3000); // 3 วินาที
+    if (commentIndex > 1 && commentIndex <= MOCK_DATA.length) {
+      setVisibleComments(prev => [...prev, MOCK_DATA[commentIndex - 1]]);
     }
-    return () => clearInterval(interval);
+  }, [commentIndex]);
+
+  // --- ตัวที่ 2: โค้ดใหม่ Dynamic Delay (หน่วงเวลาตามบท) ---
+  useEffect(() => {
+    let timeoutId;
+
+    const showNextComment = () => {
+      setCommentIndex(prev => {
+        // ถ้าถึงข้อความสุดท้ายแล้ว ให้หยุด Auto
+        if (prev >= MOCK_DATA.length) {
+          setIsAutoFlowing(false);
+          return prev;
+        }
+
+        // ดึงค่า delay ของข้อความ 'ปัจจุบัน' (เพื่อหน่วงเวลาก่อนจะโชว์ข้อความถัดไป)
+        // ถ้าในข้อมูลไม่ได้ใส่ delay ไว้ ให้ใช้ค่าเริ่มต้น 6000 ms (6 วินาที)
+        const currentDelay = MOCK_DATA[prev - 1]?.delay || 6000;
+
+        timeoutId = setTimeout(showNextComment, currentDelay);
+        return prev + 1;
+      });
+    };
+
+    if (isAutoFlowing) {
+      // เริ่มทำงานทันทีที่กด Auto แล้วค่อยหน่วงเวลา
+      showNextComment();
+    }
+
+    return () => clearTimeout(timeoutId);
   }, [isAutoFlowing]);
 
   // Effects (Viewer Count)
@@ -282,7 +305,7 @@ export default function App() {
     const updateViewerCount = () => {
       setViewerCount(prev => {
         const MIN = 1250, MAX = 3500;
-        let change = Math.floor(Math.random() * 36) - 15; 
+        let change = Math.floor(Math.random() * 36) - 15;
         if (prev < MIN) change = Math.abs(change) + 5;
         else if (prev > MAX) change = -Math.abs(change) - 5;
         return prev + change;
@@ -299,7 +322,7 @@ export default function App() {
       if (document.activeElement.tagName === 'INPUT') return;
       if (e.code === 'Space') { e.preventDefault(); setCommentIndex(prev => prev < MOCK_DATA.length ? prev + 1 : prev); }
       if (e.key === 'r' || e.key === 'R') window.location.reload();
-      
+
       // --- อัปเดต Hotkeys สำหรับ Sticker ---
       // กด 4: สลับไปมา ระหว่าง PRE499 กับ THUMBS_UP
       if (e.key === '4' || e.key === '๔') {
@@ -339,33 +362,33 @@ export default function App() {
 
       {/* --- LAYER 1: BACKGROUND --- */}
       <VideoBackground mode={bgMode} color={bgColor} selectedDeviceId={selectedDeviceId} />
-      
+
       {/* --- LAYER 2: OVERLAYS --- */}
       <SettingsMenu isOpen={showSettings} onClose={() => setShowSettings(false)} mode={bgMode} setMode={setBgMode} color={bgColor} setColor={setBgColor} currentDeviceId={selectedDeviceId} setDeviceId={setSelectedDeviceId} />
       <Header username={MOCK_DATA[0].username} profilePicture={MOCK_DATA[0].profilePicture} viewerCount={viewerCount} onSettingsClick={() => setShowSettings(p => !p)} isAutoActive={isAutoFlowing} />
 
       {/* สติ๊กเกอร์ (สลับรูปภาพตาม state activeSticker) */}
       <div className="hidden md:flex absolute top-40 right-6 z-10 flex-col gap-8 pointer-events-none">
-        <FloatingSticker 
-           // เลือก asset ตามค่า activeSticker
-           src={STICKER_ASSETS[activeSticker]} 
-           // ปรับขนาดถ้าเป็น THUMBS_UP ให้ใหญ่หน่อย (คุณปรับแต่งขนาดตรงนี้ได้)
-           size={activeSticker === 'THUMBS_UP' ? "w-24 h-24" : "w-20 h-20"} 
-           delay="0s" 
-           visible={isStickerVisible} // โชว์หรือซ่อนขึ้นอยู่กับ state isStickerVisible (ปุ่ม H)
+        <FloatingSticker
+          // เลือก asset ตามค่า activeSticker
+          src={STICKER_ASSETS[activeSticker]}
+          // ปรับขนาดถ้าเป็น THUMBS_UP ให้ใหญ่หน่อย (คุณปรับแต่งขนาดตรงนี้ได้)
+          size={activeSticker === 'THUMBS_UP' ? "w-24 h-24" : "w-20 h-20"}
+          delay="0s"
+          visible={isStickerVisible} // โชว์หรือซ่อนขึ้นอยู่กับ state isStickerVisible (ปุ่ม H)
         />
       </div>
 
       {/* --- LIKE STREAM --- */}
       <LikeStream isVisible={showAutoLikes} />
-      
+
       {/* --- LAYER 3: SECTIONS --- */}
       {showProductCard && <ShoppingCartCard item={PRODUCT_DATA} onClose={() => setShowProductCard(false)} />}
-      
+
       <CommentList comments={visibleComments} hasProductCard={showProductCard} />
-      
+
       <InputBar isAutoActive={isAutoFlowing} onToggleAuto={() => setIsAutoFlowing(p => !p)} onToggleProduct={() => setShowProductCard(p => !p)} />
-      
+
     </div>
   );
 }
