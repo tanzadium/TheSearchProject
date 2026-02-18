@@ -5,15 +5,13 @@ import MOCK_DATA from '../data/MockData';
 // --- Assets & Data ---
 const STICKER_ASSETS = {
   PRE499: "/sticker/box199.png",
-  THUMBS_UP: "/sticker/boxpre499.png", // รูปที่จะเปลี่ยนเมื่อกดเลข 4
+  THUMBS_UP: "/sticker/boxpre499.png",
   LAUGH: "/sticker/199discount.png",
   WOW: "/sticker/199discount.png",
   LIKE_HEART: "https://cdn-icons-png.flaticon.com/512/833/833472.png",
 };
 
-// ==========================================
 // ส่วนแก้ไขข้อมูลสินค้า (EDIT HERE)
-// ==========================================
 const PRODUCT_DATA = {
   id: 1,
   name: "กล่องสุ่มลุ้นโชค",
