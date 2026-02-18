@@ -264,16 +264,31 @@ export default function App() {
   // Effects (Comment Flow)
   useEffect(() => { if (commentIndex > 1 && commentIndex <= MOCK_DATA.length) setVisibleComments(prev => [...prev, MOCK_DATA[commentIndex - 1]]); }, [commentIndex]);
   useEffect(() => {
-    let interval;
+    let timeoutId;
+
+    const showNextComment = () => {
+      setCommentIndex(prev => {
+        // ถ้าถึงข้อความสุดท้ายแล้ว ให้หยุด Auto
+        if (prev >= MOCK_DATA.length) {
+          setIsAutoFlowing(false);
+          return prev;
+        }
+
+        // ดึงค่า delay ของข้อความ 'ปัจจุบัน' (เพื่อหน่วงเวลาก่อนจะโชว์ข้อความถัดไป)
+        // ถ้าในข้อมูลไม่ได้ใส่ delay ไว้ ให้ใช้ค่าเริ่มต้น 6000 ms (6 วินาที)
+        const currentDelay = MOCK_DATA[prev - 1]?.delay || 6000;
+
+        timeoutId = setTimeout(showNextComment, currentDelay);
+        return prev + 1;
+      });
+    };
+
     if (isAutoFlowing) {
-      interval = setInterval(() => {
-        setCommentIndex(prev => {
-           if (prev >= MOCK_DATA.length) { setIsAutoFlowing(false); return prev; }
-           return prev + 1;
-        });
-      }, 3000); // 3 วินาที
+      // เริ่มทำงานทันทีที่กด Auto แล้วค่อยหน่วงเวลา
+      showNextComment(); 
     }
-    return () => clearInterval(interval);
+
+    return () => clearTimeout(timeoutId);
   }, [isAutoFlowing]);
 
   // Effects (Viewer Count)
