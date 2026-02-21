@@ -247,7 +247,7 @@ export default function App() {
   
   // สติ๊กเกอร์ (กด 4 เพื่อเปลี่ยน / กด H เพื่อซ่อน)
   const [activeSticker, setActiveSticker] = useState('PRE499'); 
-  const [isStickerVisible, setIsStickerVisible] = useState(true);
+  const [isStickerVisible, setIsStickerVisible] = useState(false);
 
   const [showSettings, setShowSettings] = useState(false);
   
