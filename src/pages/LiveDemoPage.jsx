@@ -59,7 +59,7 @@ const VideoBackground = ({ mode, color, selectedDeviceId }) => {
 const Header = ({ username, profilePicture, viewerCount, onSettingsClick, isAutoActive }) => {
   const [isFollowing, setIsFollowing] = useState(false);
   return (
-    <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between p-6 pt-[max(1.5rem,env(safe-area-inset-top))] bg-gradient-to-b from-black/80 to-transparent transition-all">
+    <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between p-6 pt-[max(1.5rem,env(safe-area-inset-top))] bg-linear-to-b from-black/80 to-transparent transition-all">
       <div className="flex items-center gap-4">
         <div className="w-16 h-16 rounded-full border-2 overflow-hidden bg-gray-300 shadow-xl shrink-0">
           <img src={profilePicture} alt={username} className="w-full h-full object-cover transform scale-110"/>
@@ -99,7 +99,7 @@ const SettingsMenu = ({ isOpen, mode, setMode, color, setColor, currentDeviceId,
       </div>
       <div className="max-h-64 overflow-y-auto">
         {mode === 'video' ? devices.map(d => <button key={d.deviceId} onClick={() => setDeviceId(d.deviceId)} className="block w-full text-left text-sm p-3 border-b border-gray-700 truncate">{d.label || `Cam ${d.deviceId.slice(0,5)}`}</button>) 
-        : <div className="grid grid-cols-2 gap-3">{['#00FF00','#FF00FF','#0000FF','#000000','#FFFFFF','#808080'].map(c => <button key={c} onClick={() => setColor(c)} className="flex items-center gap-2 p-2 border border-white/10 rounded"><div className="w-4 h-4 rounded-full" style={{backgroundColor:c}}/>{c}</button>)}</div>}
+        : <div className="grid grid-cols-2 gap-3">{['transparent','#00FF00','#FF00FF','#0000FF','#000000','#FFFFFF','#808080'].map(c => <button key={c} onClick={() => setColor(c)} className="flex items-center gap-2 p-2 border border-white/10 rounded"><div className={`w-4 h-4 rounded-full ${c === 'transparent' ? 'border border-gray-500' : ''}`} style={{backgroundColor:c === 'transparent' ? 'transparent' : c}}/>{c === 'transparent' ? 'โปร่งใส' : c}</button>)}</div>}
       </div>
     </div>
   );
@@ -179,7 +179,7 @@ const CommentList = ({ comments, hasProductCard }) => {
 // SECTION: INPUT SECTION
 // ==========================================
 
-const InputBar = ({ isAutoActive, onToggleAuto, onToggleProduct }) => {
+const InputBar = ({ onToggleAuto, onToggleProduct }) => {
   const [message, setMessage] = useState('');
   const handleSendAction = () => {
     if (message.trim()) { console.log('Sending:', message); setMessage(''); } 
@@ -250,8 +250,11 @@ export default function App() {
   const [isStickerVisible, setIsStickerVisible] = useState(true);
 
   const [showSettings, setShowSettings] = useState(false);
-  const [bgMode, setBgMode] = useState('video');
-  const [bgColor, setBgColor] = useState('#FF00FF');
+  
+  // === แก้ไขจุดที่ 1 ตรงนี้ ===
+  const [bgMode, setBgMode] = useState('color');
+  const [bgColor, setBgColor] = useState('transparent'); 
+  
   const [selectedDeviceId, setSelectedDeviceId] = useState(null);
   const [isAutoFlowing, setIsAutoFlowing] = useState(false);
   const [showProductCard, setShowProductCard] = useState(false);
@@ -259,7 +262,6 @@ export default function App() {
   // 1. นำข้อมูลมาแสดงบนจอ 
   useEffect(() => {
     if (commentIndex > 0 && commentIndex <= MOCK_DATA.length) {
-      // เปลี่ยนจากเลข 0 เป็นเลข 1 เพื่อ "ข้าม" id: 0 (ร้านค้า) ไม่ให้มาโชว์ในคอมเมนต์ด้านล่างครับ
       setVisibleComments(MOCK_DATA.slice(1, commentIndex)); 
     }
   }, [commentIndex]);
@@ -269,14 +271,12 @@ export default function App() {
     let timeoutId;
     
     if (isAutoFlowing && commentIndex <= MOCK_DATA.length) {
-      // ดึงค่า delay ของคอมเมนต์ตัวก่อนหน้า (ถ้าเป็นตัวแรกให้รอ 0 วินาที)
       const currentDelay = commentIndex === 1 ? 0 : (MOCK_DATA[commentIndex - 2]?.delay || 6000);
       
       timeoutId = setTimeout(() => {
         setCommentIndex(prev => prev + 1);
       }, currentDelay);
     } else if (commentIndex > MOCK_DATA.length) {
-      // ปิดระบบ Auto เมื่อถึงข้อความสุดท้าย
       setIsAutoFlowing(false);
     }
 
@@ -326,7 +326,8 @@ export default function App() {
   }, []);
 
   return (
-    <div className="relative w-full h-[100dvh] overflow-hidden bg-black touch-none font-sans">
+    // === แก้ไขจุดที่ 2 ตรงนี้ (เปลี่ยน bg-black เป็น bg-transparent และใช้ h-[100dvh]) ===
+    <div className="relative w-full h-[100dvh] overflow-hidden bg-transparent touch-none font-sans">
       <style>{`
         @keyframes slide-up { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .animate-slide-up { animation: slide-up 0.35s ease-out; }
@@ -347,7 +348,7 @@ export default function App() {
       
       {/* --- LAYER 2: OVERLAYS --- */}
       <SettingsMenu isOpen={showSettings} onClose={() => setShowSettings(false)} mode={bgMode} setMode={setBgMode} color={bgColor} setColor={setBgColor} currentDeviceId={selectedDeviceId} setDeviceId={setSelectedDeviceId} />
-      <Header username={MOCK_DATA[0].username} profilePicture={MOCK_DATA[0].profilePicture} viewerCount={viewerCount} onSettingsClick={() => setShowSettings(p => !p)} isAutoActive={isAutoFlowing} />
+      <Header username={MOCK_DATA[0]?.username} profilePicture={MOCK_DATA[0]?.profilePicture} viewerCount={viewerCount} onSettingsClick={() => setShowSettings(p => !p)} isAutoActive={isAutoFlowing} />
 
       {/* สติ๊กเกอร์ (สลับรูปภาพตาม state activeSticker) */}
       <div className="hidden md:flex absolute top-40 right-6 z-10 flex-col gap-8 pointer-events-none">
