@@ -22,12 +22,20 @@ const STICKER_ASSETS = {
 // ==========================================
 // ส่วนแก้ไขข้อมูลสินค้า (EDIT HERE)
 // ==========================================
-const PRODUCT_DATA = {
-  id: 1,
-  name: "กล่องสุ่มลุ้นโชค",
-  price: "199",
-  image: "/sticker/box.png",
-};
+const PRODUCT_DATA = [
+  {
+    id: 1,
+    name: "กล่องสุ่มลุ้นโชค",
+    price: "199",
+    image: "/sticker/box.png",
+  },
+  {
+    id: 2,
+    name: "กล่องพรีเมียมลุ้นโชค",
+    price: "499",
+    image: "/sticker/box.png",
+  },
+];
 
 // --- Helper: Format Number ---
 const formatNumber = (num) =>
