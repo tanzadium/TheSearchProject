@@ -13,14 +13,14 @@ import MOCK_DATA from "../data/MockData";
 // --- Assets & Data ---
 const STICKER_ASSETS = {
   PRE499: "/sticker/box199.png",
-  THUMBS_UP: "/sticker/boxpre499.png", // รูปที่จะเปลี่ยนเมื่อกดเลข 4
+  THUMBS_UP: "/sticker/boxpre499.png", 
   LAUGH: "/sticker/199discount.png",
   WOW: "/sticker/199discount.png",
   LIKE_HEART: "https://cdn-icons-png.flaticon.com/512/833/833472.png",
 };
 
 // ==========================================
-// ส่วนแก้ไขข้อมูลสินค้า (EDIT HERE)
+// ข้อมูลสินค้า (มี 2 ชิ้น 199 และ 499)
 // ==========================================
 const PRODUCT_DATA = [
   {
@@ -345,7 +345,7 @@ const CommentList = ({ comments, hasProductCard }) => {
 // SECTION: INPUT SECTION
 // ==========================================
 
-const InputBar = ({ onToggleAuto, onToggleProduct }) => {
+const InputBar = ({ onToggleAuto, onCycleProduct }) => {
   const [message, setMessage] = useState("");
   const handleSendAction = () => {
     if (message.trim()) {
@@ -360,7 +360,7 @@ const InputBar = ({ onToggleAuto, onToggleProduct }) => {
     <div className="absolute bottom-0 left-0 right-0 z-20 bg-white backdrop-blur-md border-t border-gray-200 shadow-2xl pb-[env(safe-area-inset-bottom)]">
       <div className="flex items-center gap-2.5 p-3">
         <button
-          onClick={onToggleProduct}
+          onClick={onCycleProduct} // เปลี่ยนฟังก์ชันตรงนี้
           className="p-2.5 rounded-full bg-orange-500 hover:bg-orange-600 transition-all shadow-lg text-white"
         >
           <ShoppingCart size={24} />
@@ -465,13 +465,23 @@ export default function App() {
 
   const [showSettings, setShowSettings] = useState(false);
 
-  // === แก้ไขจุดที่ 1 ตรงนี้ ===
   const [bgMode, setBgMode] = useState("color");
   const [bgColor, setBgColor] = useState("transparent");
 
   const [selectedDeviceId, setSelectedDeviceId] = useState(null);
   const [isAutoFlowing, setIsAutoFlowing] = useState(false);
-  const [showProductCard, setShowProductCard] = useState(false);
+
+  // === เปลี่ยนจาก Boolean เป็น Number ===
+  // 0 = ไม่โชว์, 1 = โชว์อันที่ 1 (199), 2 = โชว์อันที่ 2 (499)
+  const [productStage, setProductStage] = useState(0); 
+
+  // ฟังก์ชันสำหรับวนลูปสินค้า
+  const cycleProduct = () => {
+    setProductStage((prev) => {
+      // 0 -> 1 -> 2 -> 0 -> 1 ...
+      return (prev + 1) % 3;
+    });
+  };
 
   // 1. นำข้อมูลมาแสดงบนจอ
   useEffect(() => {
@@ -480,7 +490,7 @@ export default function App() {
     }
   }, [commentIndex]);
 
-  // 2. ระบบ Auto-flow แบบ Dynamic Delay (เสถียรที่สุด)
+  // 2. ระบบ Auto-flow
   useEffect(() => {
     let timeoutId;
 
@@ -526,20 +536,23 @@ export default function App() {
       }
       if (e.key === "r" || e.key === "R") window.location.reload();
 
-      // กด 4: สลับสติ๊กเกอร์
       if (e.key === "4" || e.key === "๔") {
         setActiveSticker((prev) =>
           prev === "PRE499" ? "THUMBS_UP" : "PRE499",
         );
       }
-      // กด H: เปิด/ปิดการแสดงผลสติ๊กเกอร์
       if (e.key === "h" || e.key === "H" || e.key === "้") {
         setIsStickerVisible((prev) => !prev);
       }
 
       if (e.key === "c" || e.key === "C") setShowSettings((prev) => !prev);
       if (e.key === "a" || e.key === "A") setIsAutoFlowing((prev) => !prev);
-      if (e.key === "s" || e.key === "S") setShowProductCard((prev) => !prev);
+      
+      // === แก้ปุ่ม S ให้เป็นการ cycle สินค้า ===
+      if (e.key === "s" || e.key === "S") {
+        cycleProduct();
+      }
+
       if (e.key === "y" || e.key === "Y" || e.key === "ั")
         setShowAutoLikes((prev) => !prev);
     };
@@ -548,7 +561,6 @@ export default function App() {
   }, []);
 
   return (
-    // === แก้ไขจุดที่ 2 ตรงนี้ (เปลี่ยน bg-black เป็น bg-transparent และใช้ h-[100dvh]) ===
     <div className="relative w-full h-[100dvh] overflow-hidden bg-transparent touch-none font-sans">
       <style>{`
         @keyframes slide-up { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
@@ -591,7 +603,7 @@ export default function App() {
         isAutoActive={isAutoFlowing}
       />
 
-      {/* สติ๊กเกอร์ (สลับรูปภาพตาม state activeSticker) */}
+      {/* สติ๊กเกอร์ */}
       <div className="hidden md:flex absolute top-40 right-6 z-10 flex-col gap-8 pointer-events-none">
         <FloatingSticker
           src={STICKER_ASSETS[activeSticker]}
@@ -605,22 +617,27 @@ export default function App() {
       <LikeStream isVisible={showAutoLikes} />
 
       {/* --- LAYER 3: SECTIONS --- */}
-      {showProductCard && (
+      
+      {/* แสดงผลสินค้าตาม productStage
+         Stage 1 -> index 0 (199)
+         Stage 2 -> index 1 (499)
+      */}
+      {productStage > 0 && (
         <ShoppingCartCard
-          item={PRODUCT_DATA}
-          onClose={() => setShowProductCard(false)}
+          item={PRODUCT_DATA[productStage - 1]} // ลบ 1 เพราะ array เริ่มที่ 0
+          onClose={() => setProductStage(0)} // กดปิดให้กลับไป stage 0
         />
       )}
 
       <CommentList
         comments={visibleComments}
-        hasProductCard={showProductCard}
+        hasProductCard={productStage > 0} // ปรับความสูงแชท ถ้ามีสินค้าโชว์อยู่
       />
 
       <InputBar
         isAutoActive={isAutoFlowing}
         onToggleAuto={() => setIsAutoFlowing((p) => !p)}
-        onToggleProduct={() => setShowProductCard((p) => !p)}
+        onCycleProduct={cycleProduct} // ส่งฟังก์ชันวนลูปไปให้ปุ่มตะกร้า
       />
     </div>
   );
